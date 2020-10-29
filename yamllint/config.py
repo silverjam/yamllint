@@ -21,6 +21,18 @@ import yaml
 
 import yamllint.rules
 
+try:
+    from importlib.resources import files as importlib_resources_files
+
+    def _get_config_file(name):
+        return importlib_resources_files('yamllint') / 'conf' / name
+except ImportError:
+
+    def _get_config_file(name):
+        module_dir = os.path.dirname(os.path.realpath(__file__))
+        config_path = os.path.join(module_dir, 'conf', name)
+        return config_path
+
 
 class YamlLintConfigError(Exception):
     pass
@@ -203,11 +215,7 @@ def validate_rule_conf(rule, conf):
 def get_extended_config_file(name):
     # Is it a standard conf shipped with yamllint...
     if '/' not in name:
-        std_conf = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                'conf', name + '.yaml')
-
-        if os.path.isfile(std_conf):
-            return std_conf
-
+        resource = name + '.yaml'
+        return _get_config_file(resource)
     # or a custom conf on filesystem?
     return name

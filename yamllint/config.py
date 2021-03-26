@@ -19,19 +19,14 @@ import os.path
 import pathspec
 import yaml
 
+import yamllint.conf
 import yamllint.rules
 
-try:
-    from importlib.resources import files as importlib_resources_files
+from importlib_resources import open_text
 
-    def _get_config_file(name):
-        return importlib_resources_files('yamllint') / 'conf' / name
-except ImportError:
 
-    def _get_config_file(name):
-        module_dir = os.path.dirname(os.path.realpath(__file__))
-        config_path = os.path.join(module_dir, 'conf', name)
-        return config_path
+def _get_config_file(name):
+    return open_text(yamllint.conf, name)
 
 
 class YamlLintConfigError(Exception):
@@ -102,8 +97,8 @@ class YamlLintConfig(object):
 
         # Does this conf override another conf that we need to load?
         if 'extends' in conf:
-            path = get_extended_config_file(conf['extends'])
-            base = YamlLintConfig(file=path)
+            file_obj = get_extended_config_file(conf['extends'])
+            base = YamlLintConfig(content=file_obj)
             try:
                 self.extend(base)
             except Exception as e:
@@ -218,4 +213,4 @@ def get_extended_config_file(name):
         resource = name + '.yaml'
         return _get_config_file(resource)
     # or a custom conf on filesystem?
-    return name
+    return open(name)

@@ -22,11 +22,11 @@ import yaml
 import yamllint.conf
 import yamllint.rules
 
-from importlib_resources import open_text
+from importlib.resources import files
 
 
 def _get_config_file(name):
-    return open_text(yamllint.conf, name)
+    return files('yamllint.conf') / name
 
 
 class YamlLintConfigError(Exception):
@@ -211,6 +211,6 @@ def get_extended_config_file(name):
     # Is it a standard conf shipped with yamllint...
     if '/' not in name:
         resource = name + '.yaml'
-        return _get_config_file(resource)
+        return open(_get_config_file(resource))
     # or a custom conf on filesystem?
     return open(name)
